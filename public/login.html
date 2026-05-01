@@ -2,9 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Login</title>
+    <link rel="stylesheet" href="../assets/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.4/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
     
@@ -12,14 +13,86 @@
 
     </header>
 
-    <main>
+    <main class="bg-dark min-vh-100 d-flex align-items-center">
+       <div class="container py-5">
+            <img src="../assets/img/God_of_War_2018_logo.png" alt="god of war" id="gow_logo" class="d-block mx-auto mb-4 img-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+                    <div class="p-4 rounded-3 bg-black">
+                        <h2 id="titulo" class="text-center text-warning mb-4 fw-bold">Login</h2>
+                    
+                    <form id="form-login">
+                        <div id="c-email" class="conjunto mb-3">
+                            <label for="email" class="form-label text-white">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="Digite seu email" required>
+                        </div>
 
+                        <div id="c-senha" class="conjunto mb-4">
+                            <label for="senha" class="form-label text-white">Senha</label>
+                            <div class="position-relative">
+                                <input type="password" class="form-control pe-5" id="senha" placeholder="Digite sua senha" required>
+                                <button class="btn position-absolute top-50 end-0 translate-middle-y" type="button" id="toggle-senha" aria-label="Mostrar senha">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button id="botao-envio" type="submit" class="c-button c-button--gooey w-100">
+                            <span id="texto-botao">Entrar</span>
+                            <div class="c-button__blobs">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                            <div class="orb"></div>
+                        </button>
+                    </form>
+
+                    <div id="mensagem" class="text-center mt-3"></div>
+
+                    <div class="toggle" id="toggle">
+                        <p class="text-center text-white mt-4">Não tem conta? <span class="text-danger text-decoration-underline cursor-pointer" role="button">Cadastre-se!</span></p>
+                    </div>
+                </div>
+            </div>
+        </div> 
     </main>
+        
 
     <footer>
         
     </footer>
 
+    <svg style="display: block; height: 0; width: 0;" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur result="blur" stdDeviation="10" in="SourceGraphic"></feGaussianBlur>
+                <feColorMatrix result="goo" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" mode="matrix" in="blur"></feColorMatrix>
+                <feBlend in2="goo" in="SourceGraphic"></feBlend>
+            </filter>
+        </defs>
+    </svg>
+
+    <script src="../script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
