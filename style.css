@@ -468,19 +468,63 @@ a:after {
   overflow: hidden;
   inset: 0;
   transform: rotateY(calc((360deg / var(--quantity)) * var(--index))) translateZ(var(--translateZ));
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(
+    circle,
+    rgba(var(--color-card), 0.2) 0%,
+    rgba(var(--color-card), 0.6) 80%,
+    rgba(var(--color-card), 0.9) 100%
+  );
+}
+
+.arma-label {
+  margin: 0;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  flex-shrink: 0;
 }
 
 .arma-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  background: #0000
-    radial-gradient(
-      circle,
-      rgba(var(--color-card), 0.2) 0%,
-      rgba(var(--color-card), 0.6) 80%,
-      rgba(var(--color-card), 0.9) 100%
-    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* background movido para .arma-card */
 }
 
+/* Imagem dentro do card: cobre todo o espaço, centralizada e sem distorção */
+.arma-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  
+  .inner {
+    --w: 100px;
+    --h: 150px;
+    --translateZ: calc((var(--w) + var(--h)));
+    --rotateX: -15deg;
+    --perspective: 1000px;
+    position: absolute;
+    width: var(--w);
+    height: var(--h);
+    top: 10%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    transform-style: preserve-3d;
+    animation: rotating 20s linear infinite;
+  }
+}
 /* Fim da animação das armas */
