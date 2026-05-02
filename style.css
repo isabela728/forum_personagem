@@ -1,7 +1,39 @@
+@font-face{
+  font-family: 'GodOfWar';
+  src: url('./fonts/GODOFWAR.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body{
+  font-family:
+    'Segoe UI Symbol',
+    'Arial Unicode MS',
+    sans-serif;
+}
+
+.logo_gow{
+  width: 50px;
+  cursor: pointer;
+}
+
+#titulo,
+a,
+button,
+#texto-botao,
+#toggle span {
+  font-family: 'GodOfWar', 'Segoe UI Symbol', 'Arial Unicode MS', sans-serif;
+}
+
+input{
+  font-family: 'Segoe UI Symbol';
+}
+
 #gow_logo{
     width: 450px;
 }
 
+/*animação do botão de entrar*/
 .c-button {
   font-weight: 700;
   font-size: 16px;
@@ -40,7 +72,7 @@
 
 .c-button--gooey .c-button__blobs div {
   background-color: #d90606;
-  width: 34%;
+  width: 37%;
   height: 100%;
   border-radius: 100%;
   position: absolute;
@@ -76,7 +108,9 @@
   10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
   20%, 40%, 60%, 80% { transform: translateX(4px); }
 }
+/*fim da animação do botão de entrar*/
 
+/*animação das orbes*/
 .c-button--gooey .orb {
   position: absolute;
   width: 12px;
@@ -295,4 +329,54 @@
     right: -5px;
     opacity: 0;
   }
+}
+/*fim da animação das orbes*/
+
+.nav-link {
+  transition: color 0.3s ease;
+}
+.nav-link:hover {
+  color: #d90606 !important;
+}
+
+a {
+  color: #e1e1e1;
+  position: relative;
+  border: none;
+  background: none;
+  text-transform: uppercase;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: color;
+}
+
+a:focus,
+a:hover {
+  color: #fff;
+}
+
+a:focus:after,
+a:hover:after {
+  width: 100%;
+  left: 0%;
+}
+
+a:after {
+  content: "";
+  pointer-events: none;
+  bottom: -2px;
+  left: 50%;
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background-color: #d90606;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: width, left;
+}
+
+#hero_background {
+  width: 100%;
+  height: 100vh;
+  object-fit: contain;
 }

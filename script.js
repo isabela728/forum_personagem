@@ -52,7 +52,7 @@ let cadastro = false;
         } else {
             let salva = localStorage.getItem(email);
             if (salva === senha) {
-                elMensagem.innerHTML = "<div class='text-success fw-bold'>Login com sucesso!</div>";
+                window.location.href = 'home.html';
             } else {
                 elMensagem.innerHTML = "<div class='text-danger fw-bold'>Dados Incorretos!</div>";
             }
