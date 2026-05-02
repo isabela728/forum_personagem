@@ -7,6 +7,16 @@
     <link rel="icon" href="../assets/icons/logo_gow.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
+    <!-- Three.js Import Map -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+
 </head>
 <body class="bg-black">
     
@@ -40,6 +50,32 @@
             <source media="(max-width: 968px)" srcset="../assets/img/hero_page_background_small.jpeg">
             <img src="../assets/img/hero_page_background.webp" alt="Background" id="hero_background">
         </picture>
+
+        <!-- Seção Kratos Modelo 3D -->
+        <section class="container mt-5 mb-5 text-light" id="kratos-section">
+            <div class="row align-items-center">
+                <!-- Visualizador 3D -->
+                <div class="col-md-6" id="model-container">
+                    <div id="loading-model" class="text-center text-danger fw-bold fs-4 position-absolute w-100">
+                        Carregando modelo 3D...
+                    </div>
+                </div>
+                <!-- Descrição -->
+                <div class="col-md-6 descricao">
+                    <h2 class="display-4 text-danger mb-4 text-uppercase">Kratos</h2>
+                    <p class="fs-5">
+                        Kratos, o Fantasma de Esparta, é um guerreiro marcado pela tragédia e impulsionado por uma fúria incontrolável. Antigo general espartano, ele foi enganado por Ares e acabou destruindo sua própria família.
+                    </p>
+                    <p class="fs-5">
+                        Após anos buscando vingança e destruindo o panteão grego, ele agora habita as terras gélidas de Midgard, lutando não mais por ódio, mas para sobreviver e proteger seu filho Atreus.
+                    </p>
+                    <p class="fs-5 text-secondary">
+                        <small><em>Dica: Segure o botão esquerdo do mouse e arraste o modelo 3D ao lado para rotacioná-lo. Use o scroll do mouse para dar zoom e o botão direito do mouse para movimentar a câmera.</em></small>
+                    </p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer>
@@ -47,5 +83,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script type="module" src="../scripts/model_viewer.js"></script>
 </body>
 </html>

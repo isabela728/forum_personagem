@@ -380,3 +380,46 @@ a:after {
   height: 100vh;
   object-fit: contain;
 }
+
+/* Seção 3D do Kratos */
+#kratos-section {
+    position: relative;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    padding: 20px 0;
+}
+
+#model-container {
+    min-height: 500px;
+    position: relative;
+    cursor: grab;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#model-container:active {
+    cursor: grabbing;
+}
+
+.descricao {
+    padding: 2rem;
+}
+
+.descricao h2 {
+    font-family: 'GodOfWar', sans-serif;
+    text-shadow: 2px 2px 5px rgba(217, 6, 6, 0.5);
+}
+
+.descricao p {
+    font-family: 'Segoe UI Symbol', sans-serif;
+    line-height: 1.6;
+    color: #e1e1e1;
+}
+
+#loading-model{
+  top: 50%; 
+  transform: translateY(-50%); 
+  z-index: 10;
+}
