@@ -1,17 +1,27 @@
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>História</title>
+    <title>História - God of War</title>
+    <meta name="description" content="Descubra a história épica de Kratos, o Fantasma de Esparta, em uma experiência cinematográfica de scroll.">
     <link rel="icon" href="../assets/icons/logo_gow.png" type="image/x-icon">
     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/historia.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 <body class="bg-black">
     
-    <header>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-text">Carregando</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+    </div>
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <header>
+        <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-dark bg-dark" style="position:fixed; top:0; width:100%; z-index:1000; transition: transform 0.5s ease, opacity 0.5s ease;">
             <div class="container-fluid">
                 <img src="../assets/icons/logo_gow.png" class="logo_gow me-3" alt="Logo" onclick="window.location.href='home.html'">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,24 +41,47 @@
                 </div>
             </div>
         </nav>
-
     </header>
 
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator">
+        <span>Role para baixo</span>
+        <div class="scroll-arrow"></div>
+    </div>
+
+    <!-- Frame Counter -->
+    <div class="frame-counter" id="frameCounter"></div>
+
+    <!-- Main Scroll Animation Section -->
+    <section class="scroll-animation-section" id="scrollSection">
+        <div class="canvas-wrapper">
+            <!-- Back Button -->
+            <a href="home.html" class="back-home-btn" title="Voltar para Home">
+                <span class="back-arrow">&#10094;</span>
+            </a>
+            
+            <canvas id="scrollCanvas"></canvas>
+            <!-- Story Text Overlay -->
+            <div class="text-overlay text-overlay-center" id="textOverlay" style="opacity:0; visibility:hidden;">
+                <h2 class="text-overlay-title" id="textTitle"></h2>
+                <p class="text-overlay-description" id="textDescription"></p>
+            </div>
+        </div>
+    </section>
+
     
-    
-    
-    <footer class="py-3 my-4 bg-dark mb-0"> 
-        
+    <footer class="py-4 bg-dark w-100 position-relative" style="z-index: 100;">
         <ul class="nav justify-content-center border-bottom pb-3 mb-3"> 
             <li class="nav-item"><a href="home.html" class="nav-link px-2 text-white">Home</a></li> 
             <li class="nav-item"><a href="historia.html" class="nav-link px-2 text-white">Historia</a></li> 
             <li class="nav-item"><a href="curiosidade.html" class="nav-link px-2 text-white">Curiosidades</a></li>  
         </ul> 
-        
-        <p class="text-center text-white">&copy; 2026 Kratos Fan Page. Todos os direitos reservados.</p> 
+        <p class="text-center text-white mb-0">&copy; 2026 Kratos Fan Page. Todos os direitos reservados.</p> 
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    
+    <script src="../scripts/historia_scroll.js"></script>
+
 </body>
 
 </html>
