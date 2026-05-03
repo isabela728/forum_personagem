@@ -21,7 +21,7 @@
     const CACHE_LIMIT = isGitHubPages ? 800 : 200; 
 
     // Tamanho do buffer: quantos frames carregar à frente/atrás da posição atual
-    const BUFFER_SIZE = 40;
+    const BUFFER_SIZE = isGitHubPages ? 20 : 40;
 
     // ===== TEXTOS DA HISTÓRIA (OVERLAYS) =====
     // Cada entrada: { start, end, title, description, position }
@@ -313,56 +313,55 @@
         backgroundPreload();
     }
 
-    // Pré-carregamento em segundo plano: carrega frames em blocos
+    // Pré-carregamento inteligente: foca nos frames ao redor da posição atual
     let preloadingActive = false;
     let lastScrollTime = 0;
     async function backgroundPreload() {
         if (preloadingActive) return;
         preloadingActive = true;
 
-        let i = 1;
-        const chunkSize = 10;
-
-        while (i <= TOTAL_FRAMES) {
-            // Buffer Inteligente: No GitHub, não carrega mais de 300 frames à frente da posição atual
-            // para economizar banda e manter o site "leve".
-            if (isGitHubPages && i > currentFrameIndex + 300) {
-                await new Promise(r => setTimeout(r, 2000));
-                // Apenas avança o i se ele estiver atrás do currentFrameIndex
-                if (i < currentFrameIndex) i = currentFrameIndex;
+        while (true) {
+            // Se o usuário estiver scrollando muito rápido, espera um pouco
+            if (Date.now() - lastScrollTime < 500) {
+                await new Promise(r => setTimeout(r, 500));
                 continue;
             }
 
-            // Pausa o carregamento se o usuário estiver scrollando
-            if (Date.now() - lastScrollTime < 1500) {
-                await new Promise(r => setTimeout(r, 1000));
-                continue;
-            }
+            const lookAhead = isGitHubPages ? 150 : 400;
+            const lookBehind = 100;
+            let foundSomethingToLoad = false;
 
-            const promises = [];
-            for (let j = i; j < Math.min(i + chunkSize, TOTAL_FRAMES + 1); j++) {
-                if (!imageCache.has(j) && !loadingPromises.has(j)) {
-                    promises.push(loadImage(j));
+            // Tenta encontrar um frame para carregar perto da posição atual
+            // Prioriza um pouco mais a frente do que atrás
+            for (let d = 1; d <= Math.max(lookAhead, lookBehind); d++) {
+                // Tenta frente
+                if (d <= lookAhead) {
+                    const nextIdx = currentFrameIndex + d;
+                    if (nextIdx <= TOTAL_FRAMES && !imageCache.has(nextIdx) && !loadingPromises.has(nextIdx)) {
+                        await loadImage(nextIdx);
+                        foundSomethingToLoad = true;
+                        break;
+                    }
+                }
+                // Tenta trás
+                if (d <= lookBehind) {
+                    const prevIdx = currentFrameIndex - d;
+                    if (prevIdx >= 1 && !imageCache.has(prevIdx) && !loadingPromises.has(prevIdx)) {
+                        await loadImage(prevIdx);
+                        foundSomethingToLoad = true;
+                        break;
+                    }
                 }
             }
 
-            if (promises.length > 0) {
-                await Promise.all(promises);
-            }
-
-            i += chunkSize;
-
-            // Pequena pausa para manter a UI responsiva
-            await new Promise(r => setTimeout(r, isGitHubPages ? 200 : 100));
-            
-            // Se chegarmos ao fim mas o índice atual estiver muito atrás, reseta i para checar lacunas
-            if (i > TOTAL_FRAMES && currentFrameIndex < TOTAL_FRAMES - 100) {
-                i = 1;
-                await new Promise(r => setTimeout(r, 5000));
+            if (!foundSomethingToLoad) {
+                // Se tudo ao redor estiver carregado, espera mais tempo
+                await new Promise(r => setTimeout(r, 2000));
+            } else {
+                // Pequena pausa entre carregamentos de fundo para não travar a CPU
+                await new Promise(r => setTimeout(r, isGitHubPages ? 100 : 30));
             }
         }
-
-        preloadingActive = false;
     }
 
     // Carregamento sob demanda para frames próximos à posição de scroll
