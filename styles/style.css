@@ -475,13 +475,40 @@ a:after {
 
 .arma-card {
   position: absolute;
-  border: 2px solid rgba(var(--color-card));
-  border-radius: 12px;
-  overflow: hidden;
   inset: 0;
   transform: rotateY(calc((360deg / var(--quantity)) * var(--index))) translateZ(var(--translateZ));
+  transform-style: preserve-3d;
+  cursor: pointer;
+  transition: transform 0.5s;
+}
+
+.arma-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.arma-card.flipped .arma-card-inner {
+  transform: rotateY(180deg);
+}
+
+.arma-card-front, .arma-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border: 2px solid rgba(var(--color-card));
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.arma-card-front {
   background: radial-gradient(
     circle,
     rgba(var(--color-card), 0.2) 0%,
@@ -489,6 +516,24 @@ a:after {
     rgba(var(--color-card), 0.9) 100%
   );
 }
+
+.arma-card-back {
+  background: #1a1a1a;
+  color: white;
+  transform: rotateY(180deg);
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  border-color: #d90606;
+}
+
+.arma-desc {
+  font-size: 0.7rem;
+  line-height: 1.2;
+  margin: 0;
+  font-family: 'Segoe UI Symbol', sans-serif;
+}
+
 
 .arma-label {
   font-family: 'GodOfWar', sans-serif;
