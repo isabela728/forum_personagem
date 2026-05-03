@@ -17,15 +17,10 @@
     const FRAME_PATH = isGitHubPages ? '../assets/videos/frames_12fps/webp85/' : '../assets/videos/frames_12fps/';
     const FRAME_EXT = isGitHubPages ? '.webp' : '.jpg';
     
-    // Gerenciamento de memória: limita o número de frames em memória para evitar travamentos
-    const CACHE_LIMIT = isGitHubPages ? 800 : 200; 
+    // Limite de memória para não travar o PC no localhost
+    const CACHE_LIMIT = isGitHubPages ? 800 : 400; 
+    const BUFFER_SIZE = 30;
 
-    // Tamanho do buffer: quantos frames carregar à frente/atrás da posição atual
-    const BUFFER_SIZE = isGitHubPages ? 20 : 40;
-
-    // ===== TEXTOS DA HISTÓRIA (OVERLAYS) =====
-    // Cada entrada: { start, end, title, description, position }
-    // position: 'overlay-center', 'bottom-left', 'bottom-right', 'top-left', 'top-right'
     const storyTexts = [
         {
             start: -20,
@@ -141,321 +136,127 @@
         }
     ];
 
-    // Gera a URL do frame
     function getFrameSrc(index) {
         return FRAME_PATH + 'frame_' + String(index).padStart(4, '0') + FRAME_EXT;
     }
 
-    // Cache de imagens e estado de carregamento
     const imageCache = new Map();
     const loadingPromises = new Map();
     let currentFrameIndex = 1;
     let isReady = false;
 
-    // Ajusta a resolução do canvas (limitada para performance)
     function resizeCanvas() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         canvas.width = window.innerWidth * dpr;
         canvas.height = window.innerHeight * dpr;
     }
     resizeCanvas();
-    window.addEventListener('resize', () => {
-        resizeCanvas();
-        drawFrame(currentFrameIndex);
-    });
+    window.addEventListener('resize', resizeCanvas);
 
-    // Desenha um frame no canvas (modo cover)
     function drawFrame(index) {
         const img = imageCache.get(index);
-        if (!img || !img.complete || img.naturalWidth === 0) return;
-
+        if (!img || !img.complete) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const canvasRatio = canvas.width / canvas.height;
         const imgRatio = img.naturalWidth / img.naturalHeight;
-
-        let drawW, drawH, offsetX, offsetY;
-
-        if (imgRatio > canvasRatio) {
-            drawH = canvas.height;
-            drawW = imgRatio * drawH;
-            offsetX = (canvas.width - drawW) / 2;
-            offsetY = 0;
-        } else {
-            drawW = canvas.width;
-            drawH = drawW / imgRatio;
-            offsetX = 0;
-            offsetY = (canvas.height - drawH) / 2;
-        }
-
-        ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+        const canvasRatio = canvas.width / canvas.height;
+        let dW, dH, oX, oY;
+        if (imgRatio > canvasRatio) { dH = canvas.height; dW = imgRatio * dH; oX = (canvas.width - dW) / 2; oY = 0; }
+        else { dW = canvas.width; dH = dW / imgRatio; oX = 0; oY = (canvas.height - dH) / 2; }
+        ctx.drawImage(img, oX, oY, dW, dH);
     }
 
-    // ===== LÓGICA DE OVERLAY DE TEXTO =====
-    function updateTextOverlay(frameIndex) {
-        let activeText = null;
-        let opacity = 0;
-
-        for (const entry of storyTexts) {
-            if (frameIndex >= entry.start && frameIndex <= entry.end) {
-                activeText = entry;
-
-                // Calcula opacidade de fade in/out
-                const range = entry.end - entry.start;
-                const fadeZone = Math.min(40, range * 0.2); // 20% do intervalo ou 40 frames
-                const progress = frameIndex - entry.start;
-                const remaining = entry.end - frameIndex;
-
-                if (progress < fadeZone) {
-                    opacity = progress / fadeZone;
-                } else if (remaining < fadeZone) {
-                    opacity = remaining / fadeZone;
-                } else {
-                    opacity = 1;
-                }
-                break;
-            }
-        }
-
-        if (activeText) {
-            textTitle.textContent = activeText.title;
-            textDescription.textContent = activeText.description;
-            textOverlay.style.opacity = opacity;
+    function updateTextOverlay(index) {
+        let active = null;
+        for (const t of storyTexts) { if (index >= t.start && index <= t.end) { active = t; break; } }
+        if (active) {
+            textTitle.textContent = active.title;
+            textDescription.textContent = active.description;
+            textOverlay.style.opacity = 1;
             textOverlay.style.visibility = 'visible';
-
-            // Atualiza a classe de posição
-            textOverlay.className = 'text-overlay text-' + activeText.position;
+            textOverlay.className = 'text-overlay text-' + active.position;
         } else {
             textOverlay.style.opacity = 0;
             textOverlay.style.visibility = 'hidden';
         }
     }
 
-    // Carrega uma única imagem e retorna uma promessa
     function loadImage(index) {
         if (imageCache.has(index)) return Promise.resolve(imageCache.get(index));
         if (loadingPromises.has(index)) return loadingPromises.get(index);
-        
-        const promise = new Promise((resolve) => {
+        const p = new Promise((res) => {
             const img = new Image();
-            img.onload = async () => {
-                try {
-                    // Decodificar apenas se não for WebP ou se estiver em localhost
-                    // WebP no GitHub já é leve o suficiente e decode() pode travar em alguns casos
-                    if (!isGitHubPages && 'decode' in img) {
-                        await img.decode();
-                    }
-                } catch (e) {
-                    // Silenciosamente continua se o decode falhar
-                }
-
-                // Gerenciamento de memória: remove o frame mais distante se o limite for atingido
+            img.onload = () => {
                 if (imageCache.size >= CACHE_LIMIT) {
-                    let furthestIdx = -1;
-                    let maxDist = -1;
-                    
-                    for (const cachedIdx of imageCache.keys()) {
-                        const dist = Math.abs(cachedIdx - currentFrameIndex);
-                        if (dist > maxDist) {
-                            maxDist = dist;
-                            furthestIdx = cachedIdx;
-                        }
+                    let furthest = -1, maxD = -1;
+                    for (const k of imageCache.keys()) {
+                        let d = Math.abs(k - currentFrameIndex);
+                        if (d > maxD) { maxD = d; furthest = k; }
                     }
-                    
-                    if (furthestIdx !== -1) {
-                        imageCache.delete(furthestIdx);
-                    }
+                    if (furthest !== -1) imageCache.delete(furthest);
                 }
-
                 imageCache.set(index, img);
                 loadingPromises.delete(index);
-                resolve(img);
+                res(img);
             };
-            img.onerror = () => {
-                loadingPromises.delete(index);
-                resolve(null);
-            };
+            img.onerror = () => { loadingPromises.delete(index); res(null); };
             img.src = getFrameSrc(index);
         });
-        
-        loadingPromises.set(index, promise);
-        return promise;
+        loadingPromises.set(index, p);
+        return p;
     }
 
-    // Pré-carregamento inicial (primeiros ~80 frames para um início suave)
     async function preloadInitial() {
-        const initialBatch = 80;
-        let loaded = 0;
-
-        const promises = [];
-        for (let i = 1; i <= initialBatch; i++) {
-            promises.push(
-                loadImage(i).then(() => {
-                    loaded++;
-                    const pct = Math.round((loaded / initialBatch) * 100);
-                    loadingBar.style.width = pct + '%';
-                    loadingPercent.textContent = pct + '%';
-                })
-            );
-        }
-
-        await Promise.all(promises);
-
-        // Desenha o primeiro frame
+        for (let i = 1; i <= 50; i++) await loadImage(i);
         drawFrame(1);
         updateTextOverlay(1);
-
-        // Esconde o overlay de carregamento
         loadingOverlay.classList.add('hidden');
         isReady = true;
-
-        // Inicia o pré-carregamento em segundo plano
         backgroundPreload();
     }
 
-    // Pré-carregamento inteligente: foca nos frames ao redor da posição atual
-    let preloadingActive = false;
-    let lastScrollTime = 0;
     async function backgroundPreload() {
-        if (preloadingActive) return;
-        preloadingActive = true;
-
-        while (true) {
-            // Se o usuário estiver scrollando muito rápido, espera um pouco
-            if (Date.now() - lastScrollTime < 500) {
-                await new Promise(r => setTimeout(r, 500));
-                continue;
-            }
-
-            const lookAhead = isGitHubPages ? 150 : 400;
-            const lookBehind = 100;
-            let foundSomethingToLoad = false;
-
-            // Tenta encontrar um frame para carregar perto da posição atual
-            // Prioriza um pouco mais a frente do que atrás
-            for (let d = 1; d <= Math.max(lookAhead, lookBehind); d++) {
-                // Tenta frente
-                if (d <= lookAhead) {
-                    const nextIdx = currentFrameIndex + d;
-                    if (nextIdx <= TOTAL_FRAMES && !imageCache.has(nextIdx) && !loadingPromises.has(nextIdx)) {
-                        await loadImage(nextIdx);
-                        foundSomethingToLoad = true;
-                        break;
-                    }
-                }
-                // Tenta trás
-                if (d <= lookBehind) {
-                    const prevIdx = currentFrameIndex - d;
-                    if (prevIdx >= 1 && !imageCache.has(prevIdx) && !loadingPromises.has(prevIdx)) {
-                        await loadImage(prevIdx);
-                        foundSomethingToLoad = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!foundSomethingToLoad) {
-                // Se tudo ao redor estiver carregado, espera mais tempo
-                await new Promise(r => setTimeout(r, 2000));
-            } else {
-                // Pequena pausa entre carregamentos de fundo para não travar a CPU
-                await new Promise(r => setTimeout(r, isGitHubPages ? 100 : 30));
-            }
+        for (let i = 1; i <= TOTAL_FRAMES; i += 10) {
+            const batch = [];
+            for (let j = i; j < i + 10 && j <= TOTAL_FRAMES; j++) batch.push(loadImage(j));
+            await Promise.all(batch);
+            await new Promise(r => setTimeout(r, 50));
         }
     }
 
-    // Carregamento sob demanda para frames próximos à posição de scroll
-    let isEnsuring = false;
-    async function ensureFramesLoaded(centerIndex) {
-        if (isEnsuring) return;
-        isEnsuring = true;
-
-        try {
-            const start = Math.max(1, centerIndex - BUFFER_SIZE);
-            const end = Math.min(TOTAL_FRAMES, centerIndex + BUFFER_SIZE);
-            
-            const toLoad = [];
-            for (let i = start; i <= end; i++) {
-                if (!imageCache.has(i) && !loadingPromises.has(i)) {
-                    toLoad.push(i);
-                }
-            }
-
-            if (toLoad.length > 0) {
-                // Carrega em blocos menores para manter a responsividade
-                const subChunkSize = 5;
-                for (let i = 0; i < toLoad.length; i += subChunkSize) {
-                    const chunk = toLoad.slice(i, i + subChunkSize);
-                    await Promise.all(chunk.map(idx => loadImage(idx)));
-                    // Pequena pausa
-                    await new Promise(r => setTimeout(r, 0));
-                }
-            }
-        } finally {
-            isEnsuring = false;
+    async function ensureFrames(center) {
+        const batch = [];
+        for (let i = center - 10; i <= center + 10; i++) {
+            if (i >= 1 && i <= TOTAL_FRAMES && !imageCache.has(i)) batch.push(loadImage(i));
         }
+        await Promise.all(batch);
     }
 
-    // Calcula qual frame mostrar com base no scroll
-    function getScrollProgress() {
-        const sectionTop = section.offsetTop;
-        const scrollableHeight = section.offsetHeight - window.innerHeight;
-        const scrollY = window.scrollY - sectionTop;
-
-        let progress = scrollY / scrollableHeight;
-        progress = Math.min(Math.max(progress, 0), 1);
-        return progress;
-    }
-
-    function getFrameFromScroll(progress) {
-        return Math.max(1, Math.min(TOTAL_FRAMES, Math.floor(progress * (TOTAL_FRAMES - 1)) + 1));
-    }
-
-    // Manipulador de scroll
     let ticking = false;
     window.addEventListener('scroll', () => {
-        lastScrollTime = Date.now();
-        if (!isReady) return;
-
-        // Esconde o indicador de scroll após scrollar um pouco
-        if (window.scrollY > 200) {
-            scrollIndicator.classList.add('hide');
-        } else {
-            scrollIndicator.classList.remove('hide');
-        }
-
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                const progress = getScrollProgress();
-                const frameIndex = getFrameFromScroll(progress);
-                
-                // Lógica de visibilidade da Navbar: Mostra no topo (progress < 0.01) ou no fim (progress > 0.99)
-                if (mainNavbar) {
-                    if (progress > 0.01 && progress < 0.99) {
-                        mainNavbar.classList.add('navbar-hidden');
-                    } else {
-                        mainNavbar.classList.remove('navbar-hidden');
-                    }
-                }
-                
-                if (frameIndex !== currentFrameIndex) {
-                    currentFrameIndex = frameIndex;
-                    drawFrame(currentFrameIndex);
-                    updateTextOverlay(currentFrameIndex);
-                    
-                    // Atualiza o contador de frames
-                    frameCounter.textContent = 'Frame ' + currentFrameIndex + ' / ' + TOTAL_FRAMES;
-
-                    // Aciona o carregamento sob demanda
-                    ensureFramesLoaded(currentFrameIndex);
-                }
-                
-                ticking = false;
-            });
-            ticking = true;
-        }
+        if (!isReady || ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            const top = section.offsetTop;
+            const height = section.offsetHeight - window.innerHeight;
+            let prog = (window.scrollY - top) / height;
+            prog = Math.max(0, Math.min(1, prog));
+            const idx = Math.max(1, Math.min(TOTAL_FRAMES, Math.floor(prog * (TOTAL_FRAMES - 1)) + 1));
+            
+            if (idx !== currentFrameIndex) {
+                currentFrameIndex = idx;
+                drawFrame(idx);
+                updateTextOverlay(idx);
+                frameCounter.textContent = 'Frame ' + idx + ' / ' + TOTAL_FRAMES;
+                ensureFrames(idx);
+            }
+            
+            if (mainNavbar) {
+                if (prog > 0.01 && prog < 0.99) mainNavbar.classList.add('navbar-hidden');
+                else mainNavbar.classList.remove('navbar-hidden');
+            }
+            ticking = false;
+        });
     });
 
-    // Início
     preloadInitial();
 })();
