@@ -13,14 +13,19 @@
     const mainNavbar = document.getElementById('mainNavbar');
 
     const TOTAL_FRAMES = 2485;
-    const FRAME_PATH = '../assets/videos/frames_12fps/';
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const FRAME_PATH = isGitHubPages ? '../assets/videos/frames_12fps/webp85/' : '../assets/videos/frames_12fps/';
+    const FRAME_EXT = isGitHubPages ? '.webp' : '.jpg';
+    
+    // Gerenciamento de memória: limita o número de frames em memória para evitar travamentos
+    const CACHE_LIMIT = isGitHubPages ? 800 : 200; 
 
-    // Buffer size: how many frames ahead/behind to preload
+    // Tamanho do buffer: quantos frames carregar à frente/atrás da posição atual
     const BUFFER_SIZE = 40;
 
-    // ===== STORY TEXT OVERLAYS =====
-    // Each entry: { start, end, title, description, position }
-    // position: 'center', 'bottom-left', 'bottom-right', 'top-left', 'top-right'
+    // ===== TEXTOS DA HISTÓRIA (OVERLAYS) =====
+    // Cada entrada: { start, end, title, description, position }
+    // position: 'overlay-center', 'bottom-left', 'bottom-right', 'top-left', 'top-right'
     const storyTexts = [
         {
             start: -20,
@@ -136,20 +141,22 @@
         }
     ];
 
-    // Build frame URL
+    // Gera a URL do frame
     function getFrameSrc(index) {
-        return FRAME_PATH + 'frame_' + String(index).padStart(4, '0') + '.jpg';
+        return FRAME_PATH + 'frame_' + String(index).padStart(4, '0') + FRAME_EXT;
     }
 
-    // Image cache
+    // Cache de imagens e estado de carregamento
     const imageCache = new Map();
+    const loadingPromises = new Map();
     let currentFrameIndex = 1;
     let isReady = false;
 
-    // Set canvas resolution
+    // Ajusta a resolução do canvas (limitada para performance)
     function resizeCanvas() {
-        canvas.width = window.innerWidth * (window.devicePixelRatio > 1 ? 2 : 1);
-        canvas.height = window.innerHeight * (window.devicePixelRatio > 1 ? 2 : 1);
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
     }
     resizeCanvas();
     window.addEventListener('resize', () => {
@@ -157,7 +164,7 @@
         drawFrame(currentFrameIndex);
     });
 
-    // Draw a frame on canvas (cover mode)
+    // Desenha um frame no canvas (modo cover)
     function drawFrame(index) {
         const img = imageCache.get(index);
         if (!img || !img.complete || img.naturalWidth === 0) return;
@@ -184,7 +191,7 @@
         ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
     }
 
-    // ===== TEXT OVERLAY LOGIC =====
+    // ===== LÓGICA DE OVERLAY DE TEXTO =====
     function updateTextOverlay(frameIndex) {
         let activeText = null;
         let opacity = 0;
@@ -193,9 +200,9 @@
             if (frameIndex >= entry.start && frameIndex <= entry.end) {
                 activeText = entry;
 
-                // Calculate fade in/out opacity
+                // Calcula opacidade de fade in/out
                 const range = entry.end - entry.start;
-                const fadeZone = Math.min(40, range * 0.2); // 20% of range or 40 frames
+                const fadeZone = Math.min(40, range * 0.2); // 20% do intervalo ou 40 frames
                 const progress = frameIndex - entry.start;
                 const remaining = entry.end - frameIndex;
 
@@ -216,7 +223,7 @@
             textOverlay.style.opacity = opacity;
             textOverlay.style.visibility = 'visible';
 
-            // Update position class
+            // Atualiza a classe de posição
             textOverlay.className = 'text-overlay text-' + activeText.position;
         } else {
             textOverlay.style.opacity = 0;
@@ -224,22 +231,57 @@
         }
     }
 
-    // Load a single image and return a promise
+    // Carrega uma única imagem e retorna uma promessa
     function loadImage(index) {
         if (imageCache.has(index)) return Promise.resolve(imageCache.get(index));
+        if (loadingPromises.has(index)) return loadingPromises.get(index);
         
-        return new Promise((resolve) => {
+        const promise = new Promise((resolve) => {
             const img = new Image();
-            img.onload = () => {
+            img.onload = async () => {
+                try {
+                    // Modo moderno de decodificar imagem fora da thread principal
+                    if ('decode' in img) {
+                        await img.decode();
+                    }
+                } catch (e) {
+                    console.warn("Falha ao decodificar imagem:", index);
+                }
+
+                // Gerenciamento de memória: remove o frame mais distante se o limite for atingido
+                if (imageCache.size >= CACHE_LIMIT) {
+                    let furthestIdx = -1;
+                    let maxDist = -1;
+                    
+                    for (const cachedIdx of imageCache.keys()) {
+                        const dist = Math.abs(cachedIdx - currentFrameIndex);
+                        if (dist > maxDist) {
+                            maxDist = dist;
+                            furthestIdx = cachedIdx;
+                        }
+                    }
+                    
+                    if (furthestIdx !== -1) {
+                        imageCache.delete(furthestIdx);
+                    }
+                }
+
                 imageCache.set(index, img);
+                loadingPromises.delete(index);
                 resolve(img);
             };
-            img.onerror = () => resolve(null);
+            img.onerror = () => {
+                loadingPromises.delete(index);
+                resolve(null);
+            };
             img.src = getFrameSrc(index);
         });
+        
+        loadingPromises.set(index, promise);
+        return promise;
     }
 
-    // Preload initial batch (first ~80 frames for a smooth start)
+    // Pré-carregamento inicial (primeiros ~80 frames para um início suave)
     async function preloadInitial() {
         const initialBatch = 80;
         let loaded = 0;
@@ -258,60 +300,101 @@
 
         await Promise.all(promises);
 
-        // Draw first frame
+        // Desenha o primeiro frame
         drawFrame(1);
         updateTextOverlay(1);
 
-        // Hide loading overlay
+        // Esconde o overlay de carregamento
         loadingOverlay.classList.add('hidden');
         isReady = true;
 
-        // Start background preloading
+        // Inicia o pré-carregamento em segundo plano
         backgroundPreload();
     }
 
-    // Background preload: loads frames in chunks
+    // Pré-carregamento em segundo plano: carrega frames em blocos
     let preloadingActive = false;
+    let lastScrollTime = 0;
     async function backgroundPreload() {
         if (preloadingActive) return;
         preloadingActive = true;
 
-        const chunkSize = 20;
-        for (let i = 1; i <= TOTAL_FRAMES; i += chunkSize) {
+        let i = 1;
+        const chunkSize = 10;
+
+        while (i <= TOTAL_FRAMES) {
+            // Buffer Inteligente: No GitHub, não carrega mais de 300 frames à frente da posição atual
+            // para economizar banda e manter o site "leve".
+            if (isGitHubPages && i > currentFrameIndex + 300) {
+                await new Promise(r => setTimeout(r, 2000));
+                // Atualiza i para a posição atual para checar novamente
+                i = Math.max(1, currentFrameIndex);
+                continue;
+            }
+
+            // Pausa o carregamento se o usuário estiver scrollando
+            if (Date.now() - lastScrollTime < 1500) {
+                await new Promise(r => setTimeout(r, 1000));
+                continue;
+            }
+
             const promises = [];
             for (let j = i; j < Math.min(i + chunkSize, TOTAL_FRAMES + 1); j++) {
-                if (!imageCache.has(j)) {
+                if (!imageCache.has(j) && !loadingPromises.has(j)) {
                     promises.push(loadImage(j));
                 }
             }
+
             if (promises.length > 0) {
                 await Promise.all(promises);
             }
-            // Small yield to keep UI responsive
-            await new Promise(r => setTimeout(r, 10));
+
+            i += chunkSize;
+
+            // Pequena pausa para manter a UI responsiva
+            await new Promise(r => setTimeout(r, isGitHubPages ? 200 : 100));
+            
+            // Se chegarmos ao fim mas o índice atual estiver muito atrás, reseta i para checar lacunas
+            if (i > TOTAL_FRAMES && currentFrameIndex < TOTAL_FRAMES - 100) {
+                i = 1;
+                await new Promise(r => setTimeout(r, 5000));
+            }
         }
 
         preloadingActive = false;
     }
 
-    // On-demand loading for frames near the scroll position
+    // Carregamento sob demanda para frames próximos à posição de scroll
+    let isEnsuring = false;
     async function ensureFramesLoaded(centerIndex) {
+        if (isEnsuring) return;
+        isEnsuring = true;
+
         const start = Math.max(1, centerIndex - BUFFER_SIZE);
         const end = Math.min(TOTAL_FRAMES, centerIndex + BUFFER_SIZE);
         
         const toLoad = [];
         for (let i = start; i <= end; i++) {
-            if (!imageCache.has(i)) {
+            if (!imageCache.has(i) && !loadingPromises.has(i)) {
                 toLoad.push(i);
             }
         }
 
         if (toLoad.length > 0) {
-            await Promise.all(toLoad.map(i => loadImage(i)));
+            // Carrega em blocos menores para manter a responsividade
+            const subChunkSize = 5;
+            for (let i = 0; i < toLoad.length; i += subChunkSize) {
+                const chunk = toLoad.slice(i, i + subChunkSize);
+                await Promise.all(chunk.map(idx => loadImage(idx)));
+                // Pequena pausa
+                await new Promise(r => setTimeout(r, 0));
+            }
         }
+        
+        isEnsuring = false;
     }
 
-    // Calculate which frame to show based on scroll
+    // Calcula qual frame mostrar com base no scroll
     function getScrollProgress() {
         const sectionTop = section.offsetTop;
         const scrollableHeight = section.offsetHeight - window.innerHeight;
@@ -326,12 +409,13 @@
         return Math.max(1, Math.min(TOTAL_FRAMES, Math.floor(progress * (TOTAL_FRAMES - 1)) + 1));
     }
 
-    // Scroll handler
+    // Manipulador de scroll
     let ticking = false;
     window.addEventListener('scroll', () => {
+        lastScrollTime = Date.now();
         if (!isReady) return;
 
-        // Hide scroll indicator after scrolling a bit
+        // Esconde o indicador de scroll após scrollar um pouco
         if (window.scrollY > 200) {
             scrollIndicator.classList.add('hide');
         } else {
@@ -343,7 +427,7 @@
                 const progress = getScrollProgress();
                 const frameIndex = getFrameFromScroll(progress);
                 
-                // Navbar visibility logic: Show at top (progress < 0.01) or bottom (progress > 0.99)
+                // Lógica de visibilidade da Navbar: Mostra no topo (progress < 0.01) ou no fim (progress > 0.99)
                 if (mainNavbar) {
                     if (progress > 0.01 && progress < 0.99) {
                         mainNavbar.classList.add('navbar-hidden');
@@ -357,10 +441,10 @@
                     drawFrame(currentFrameIndex);
                     updateTextOverlay(currentFrameIndex);
                     
-                    // Update frame counter
+                    // Atualiza o contador de frames
                     frameCounter.textContent = 'Frame ' + currentFrameIndex + ' / ' + TOTAL_FRAMES;
 
-                    // Trigger on-demand loading
+                    // Aciona o carregamento sob demanda
                     ensureFramesLoaded(currentFrameIndex);
                 }
                 
@@ -370,6 +454,6 @@
         }
     });
 
-    // Start
+    // Início
     preloadInitial();
 })();
