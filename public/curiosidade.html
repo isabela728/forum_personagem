@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>História</title>
     <link rel="icon" href="../assets/icons/logo_gow.png" type="image/x-icon">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
-<body class="bg-black">
+<body class="bg-black d-flex flex-column vh-100 overflow-hidden">
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-text">Carregando</div>
@@ -35,17 +35,73 @@
                 </div>
 
                 <div class="d-flex ms-auto">
-                    <a class="nav-link text-light fs-4" href="login.html">Sair</a>
+                    <a class="nav-link text-light fs-4 me-3" href="login.html">Sair</a>
                 </div>
             </div>
         </nav>
 
     </header>
 
-
+    <main class="flex-grow-1 d-flex flex-column justify-content-center">
+        <div class="container py-3">
+            <h2 class="display-4 text-warning mb-3 text-center font-gow">Curiosidades</h2>
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-11">
+                    <div id="carouselExampleFade" class="carousel slide carousel-fade reveal" data-bs-interval="false">
+                        <div class="carousel-inner rounded-5 shadow-lg">
+                            <div class="carousel-item active">
+                                <img src="../assets/img/curiosidade_1.jpg" class="d-block w-100" alt="curiosidade_1" style="max-height: 45vh; object-fit: cover;">
+                                <div class="bg-dark p-4 border-top border-danger border-3">
+                                    <p class="text-light fs-5 mb-0 text-center">No início, Kratos não era Kratos, era Deimos. O nome foi descartado para o protagonista da série, mas nunca abandonado, tanto que acabou virando o nome do irmão mais novo de Kratos.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="../assets/img/curiosidade_2.jpg" class="d-block w-100" alt="curiosidade_2" style="max-height: 45vh; object-fit: cover;">
+                                <div class="bg-dark p-4 border-top border-danger border-3">
+                                    <p class="text-light fs-5 mb-0 text-center">A pele de Kratos é branca por conta da maldição de um oráculo. Para nunca esquecer disso, a oráculo condenou Kratos a carregar na pele as cinzas da família.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="../assets/img/curiosidade_3.jpg" class="d-block w-100" alt="curiosidade_3" style="max-height: 45vh; object-fit: cover;">
+                                <div class="bg-dark p-4 border-top border-danger border-3">
+                                    <p class="text-light fs-5 mb-0 text-center">Antes de chegar ao icônico Kratos careca que virou sinônimo da série de ação, a equipe de desenvolvimento do primeiro jogo passou por algumas ideias bem menos convencionais. Dentre as mais notórias, uma delas mostrava Kratos como uma espécie de monge cego carregando uma criança nas costas (não se sabe exatamente quem é o bebê) e outra aparecia como um guerreiro de aspecto tribal, com uma lança na mão, cabelos desgrenhados e adereços que lembram penas.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="../assets/img/curiosidade_4.jpg" class="d-block w-100" alt="curiosidade_4" style="max-height: 45vh; object-fit: cover;">
+                                <div class="bg-dark p-4 border-top border-danger border-3">
+                                    <p class="text-light fs-5 mb-0 text-center">Com o sucesso em "God of War", Kratos trilhou o caminho de convidado especial em diversos games. A primeira, e mais inusitada, aparição foi no esportivo "Hot Shots Golf: Out of Bounds", mas depois ele apareceu também em "Soulcalibur: Broken Destiny", "Mortal Kombat", "PlayStation All-Stars Battle Royale", "Shovel Knight" e como 'roupinha' em outros títulos, como "Modnation Racers", "LittleBigPlanet" e "Tearaway Unfolded".</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="../assets/img/curiosidade_5.jpg" class="d-block w-100" alt="curiosidade_5" style="max-height: 45vh; object-fit: cover;">
+                                <div class="bg-dark p-4 border-top border-danger border-3">
+                                    <p class="text-light fs-5 mb-0 text-center">Tanto a cicatriz no rosto quanto a tatuagem vermelha de Kratos têm relação com o irmão Deimos. A cicatriz veio quando ainda eram crianças: Ares sequestrou Deimos, Kratos tentou impedir e levou um corte no olho. Por conta do sumiço do irmão, Kratos fez uma tatuagem vermelha pelo corpo, idêntica à marca de nascença do irmão.</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="../assets/img/curiosidade_6.jpg" class="d-block w-100" alt="curiosidade_6" style="max-height: 45vh; object-fit: cover;">
+                                <div class="bg-dark p-4 border-top border-danger border-3">
+                                    <p class="text-light fs-5 mb-0 text-center">Poucos dias antes da produção do primeiro jogo da série terminar, Kratos já exibia o visual que conhecemos, com exceção de um único detalhe: suas tatuagens eram azuis, não vermelhas. Foi aí que alguém percebeu enorme semelhança entre o 'Kratos azul' e o bárbaro de "Diablo II". Às pressas, ajustes foram feitos e o primeiro "God of War" mostrou o espartano com as tattoos vermelhas que conhecemos.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>    
+                </div>
+            </div>
+        </div>
+    </main>
 
     
-    <footer class="py-3 my-4 bg-dark mb-0"> 
+    <footer class="py-3 mt-auto bg-dark mb-0"> 
         
         <ul class="nav justify-content-center border-bottom pb-3 mb-3"> 
             <li class="nav-item"><a href="home.html" class="nav-link px-2 text-white">Home</a></li> 
@@ -57,6 +113,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script type="module" src="../scripts/loading.js"></script>
+    <script src="../scripts/scroll_reveal.js"></script>
 </body>
     
 </html>

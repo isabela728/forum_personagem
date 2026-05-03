@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../styles/style.css">
     <link rel="icon" href="../assets/icons/logo_gow.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <!-- Bootstrap Icons -->
@@ -40,14 +40,14 @@
 
                 <div class="collapse navbar-collapse p-3" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-link text-light fs-4 mx-4" aria-current="page" href="home.html">Home</a>
-                        <a class="nav-link fw-bold text-light fs-4 mx-4" href="historia.html">Historia</a>
+                        <a class="nav-link fw-bold text-light fs-4 mx-4" aria-current="page" href="home.html">Home</a>
+                        <a class="nav-link text-light fs-4 mx-4" href="historia.html">Historia</a>
                         <a class="nav-link text-light fs-4 mx-4" href="curiosidade.html">Curiosidades</a>
                     </div>
                 </div>
 
                 <div class="d-flex ms-auto">
-                    <a class="nav-link text-light fs-4" href="login.html">Sair</a>
+                    <a class="nav-link text-light fs-4 me-3" href="login.html">Sair</a>
                 </div>
             </div>
         </nav>
@@ -64,13 +64,13 @@
         <section class="container mt-5 mb-5 text-light" id="kratos-section">
             <div class="row align-items-center">
                 <!-- Visualizador 3D -->
-                <div class="col-md-6" id="model-container">
+                <div class="col-md-6 reveal" id="model-container">
                     <div id="loading-model" class="text-center text-danger fw-bold fs-4 position-absolute w-100">
                         Carregando modelo 3D...
                     </div>
                 </div>
                 <!-- Descrição -->
-                <div class="col-md-6 descricao">
+                <div class="col-md-6 descricao reveal">
                     <h2 class="display-4 text-warning mb-4 text-uppercase">Kratos</h2>
                     <p class="fs-5">
                         Kratos, o Fantasma de Esparta, é um guerreiro marcado pela tragédia e impulsionado por uma fúria incontrolável. Antigo general espartano, ele foi enganado por Ares e acabou destruindo sua própria família.
@@ -89,11 +89,11 @@
 
 
         <!-- Seção de Armas -->
-        <div class="descricao my-5 pt-5">
-            <h2 class="display-4 text-warning mb-4 text-uppercase text-center ">Armas de Kratos</h2>
+        <div class="descricao my-5 pt-5 reveal">
+            <h2 class="display-4 text-warning mb-4 text-uppercase text-center">Armas de Kratos</h2>
         </div>
 
-        <div class="wrapper mb-5">
+        <div class="wrapper mb-5 reveal">
             <div class="inner" style="--quantity: 10;">
 
                 <div class="arma-card" style="--index: 0;--color-card: 217, 6, 6;">
@@ -158,17 +158,17 @@
 
         <div>
 
-            <div class="shadow-danger"></div>
+            <div class="shadow-danger reveal expand"></div>
    
-           <div class="descricao my-5 pt-5">
+           <div class="descricao my-5 pt-5 reveal">
                <h2 class="display-4 text-warning mb-0 text-uppercase text-center">Forum de Discussao</h2>
             </div>
             
             <div class="container justify-content-center">
-               <p class="text-center mb-4 text-light ">Discuções Recentes</p>
+               <p class="text-center mb-4 text-light reveal">Discuções Recentes</p>
                <div class="row">
 
-                    <div class="card bg-dark text-white mb-5">
+                    <div class="card bg-dark text-white mb-5 reveal">
                         <div class="card-header">
                             <div class="d-flex align-items-center">
                                 <img class="perfil" src="../assets/icons/perfil_1.jpg" alt="perfil_1">
@@ -208,7 +208,7 @@
                    </div>
 
 
-                    <div class="card bg-dark text-white mt-5">
+                    <div class="card bg-dark text-white mt-5 reveal">
                     <div class="card-header">
                         <div class="d-flex align-items-center">
                             <img class="perfil" src="../assets/icons/perfil_4.png" alt="perfil_4">
@@ -278,8 +278,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script type="module" src="../scripts/model_viewer.js"></script>
     <script type="module" src="../scripts/forum_script.js"></script>
-    <script type = module src = "../scripts/loading.js"></script>
-
+    <script type="module" src="../scripts/loading.js"></script>
+    <script src="../scripts/scroll_reveal.js"></script>
 </body>
 
 

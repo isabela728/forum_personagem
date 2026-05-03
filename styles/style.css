@@ -1,6 +1,6 @@
 @font-face{
   font-family: 'GodOfWar';
-  src: url('./fonts/GODOFWAR.TTF') format('truetype');
+  src: url('../fonts/GODOFWAR.TTF') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -442,6 +442,13 @@ a:after {
   overflow: hidden;
 }
 
+.inner:hover {
+  animation-play-state: paused !important;
+}
+.arma-card:hover {
+  animation-play-state: running !important;
+}
+
 .inner {
   --w: 150px;
   --h: 220px;
@@ -611,3 +618,31 @@ a:after {
     margin-top: 12px;
     letter-spacing: 2px;
 }
+
+/* Animação do scroll da histórisa*/
+.reveal {
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+}
+
+.reveal.active {
+    opacity: 1;
+}
+
+.reveal.expand {
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.5s ease-in-out;
+}
+
+.reveal.expand.active {
+    transform: scaleX(1);
+    opacity: 1;
+}
+/*fim da animação do srcoll*/
+
+.carousel-item img {
+    height: 500px;
+    object-fit: cover;
+}
+
