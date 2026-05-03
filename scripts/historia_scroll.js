@@ -18,7 +18,7 @@
     const FRAME_EXT = isGitHubPages ? '.webp' : '.jpg';
     
     // Limite de memória para não travar o PC no localhost
-    const CACHE_LIMIT = isGitHubPages ? 1000 : 400; 
+    const CACHE_LIMIT = isGitHubPages ? 2485 : 400; 
     const BUFFER_SIZE = 100;
 
     const storyTexts = [
