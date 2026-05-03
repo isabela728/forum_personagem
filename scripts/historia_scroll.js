@@ -240,12 +240,13 @@
             const img = new Image();
             img.onload = async () => {
                 try {
-                    // Modo moderno de decodificar imagem fora da thread principal
-                    if ('decode' in img) {
+                    // Decodificar apenas se não for WebP ou se estiver em localhost
+                    // WebP no GitHub já é leve o suficiente e decode() pode travar em alguns casos
+                    if (!isGitHubPages && 'decode' in img) {
                         await img.decode();
                     }
                 } catch (e) {
-                    console.warn("Falha ao decodificar imagem:", index);
+                    // Silenciosamente continua se o decode falhar
                 }
 
                 // Gerenciamento de memória: remove o frame mais distante se o limite for atingido
@@ -327,8 +328,8 @@
             // para economizar banda e manter o site "leve".
             if (isGitHubPages && i > currentFrameIndex + 300) {
                 await new Promise(r => setTimeout(r, 2000));
-                // Atualiza i para a posição atual para checar novamente
-                i = Math.max(1, currentFrameIndex);
+                // Apenas avança o i se ele estiver atrás do currentFrameIndex
+                if (i < currentFrameIndex) i = currentFrameIndex;
                 continue;
             }
 
@@ -370,28 +371,30 @@
         if (isEnsuring) return;
         isEnsuring = true;
 
-        const start = Math.max(1, centerIndex - BUFFER_SIZE);
-        const end = Math.min(TOTAL_FRAMES, centerIndex + BUFFER_SIZE);
-        
-        const toLoad = [];
-        for (let i = start; i <= end; i++) {
-            if (!imageCache.has(i) && !loadingPromises.has(i)) {
-                toLoad.push(i);
+        try {
+            const start = Math.max(1, centerIndex - BUFFER_SIZE);
+            const end = Math.min(TOTAL_FRAMES, centerIndex + BUFFER_SIZE);
+            
+            const toLoad = [];
+            for (let i = start; i <= end; i++) {
+                if (!imageCache.has(i) && !loadingPromises.has(i)) {
+                    toLoad.push(i);
+                }
             }
-        }
 
-        if (toLoad.length > 0) {
-            // Carrega em blocos menores para manter a responsividade
-            const subChunkSize = 5;
-            for (let i = 0; i < toLoad.length; i += subChunkSize) {
-                const chunk = toLoad.slice(i, i + subChunkSize);
-                await Promise.all(chunk.map(idx => loadImage(idx)));
-                // Pequena pausa
-                await new Promise(r => setTimeout(r, 0));
+            if (toLoad.length > 0) {
+                // Carrega em blocos menores para manter a responsividade
+                const subChunkSize = 5;
+                for (let i = 0; i < toLoad.length; i += subChunkSize) {
+                    const chunk = toLoad.slice(i, i + subChunkSize);
+                    await Promise.all(chunk.map(idx => loadImage(idx)));
+                    // Pequena pausa
+                    await new Promise(r => setTimeout(r, 0));
+                }
             }
+        } finally {
+            isEnsuring = false;
         }
-        
-        isEnsuring = false;
     }
 
     // Calcula qual frame mostrar com base no scroll
